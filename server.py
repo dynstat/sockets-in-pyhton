@@ -1,5 +1,7 @@
 # import socket module
+import os
 import socket
+import sys
 import threading
 
 # function to handle the received data from the client continuously
@@ -11,6 +13,9 @@ def client_ne_kuch_bheja_kya(connected_client,nickname):
             # print("\r"+client_ka_bheja_hua_mssg+"\nSERVER:",end=" ")
             if client_ka_bheja_hua_mssg == "exit!!":
                 print(f"{nickname} has closed the connection !!")
+                connected_client.close()
+                # sys.exit(0)
+                os._exit() 
                 break
             print(f"\r{nickname}: {client_ka_bheja_hua_mssg}\nSERVER:",end=" ")
         except:
@@ -31,6 +36,12 @@ conn, addr = s.accept()
 client_nickname = conn.recv(1024).decode()
 if client_nickname:
     print(f"{client_nickname} has joined the server.")
+else:
+    client_nickname = "Someone"
+    print(f"{client_nickname} has joined the server.")
+        
+    
+    
 conn.send(f"Hello {client_nickname}, Welcome to the server\n".encode())
 conn.send("You can send your texts now...\n".encode())
 # Thread to handling receiving mssgs from client independently
@@ -38,10 +49,16 @@ client_thread = threading.Thread(target=client_ne_kuch_bheja_kya, args=(conn,cli
 client_thread.start()
 
 while True:
-    d = input("\rSERVER: ")
-    if d != "exit!!" or not conn:
-        conn.send(d.encode())
-    else:
-        print("Closing the Server because of no client")
-        conn.close()
-        break
+    if conn:
+        d = input("\rSERVER: ")
+        try:
+            if d != "exit!!" or not conn:
+                conn.send(d.encode())
+            else:
+                print("Closing the Server because of no client")
+                conn.close()
+                break
+        except:
+            print("Server closed because of no client")
+            break
+                
