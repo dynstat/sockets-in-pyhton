@@ -4,6 +4,7 @@ import socket
 import sys
 import threading
 
+SHUTDOWN = 0
 # function to handle the received data from the client continuously
 def client_ne_kuch_bheja_kya(connected_client,nickname):
     global s
@@ -15,13 +16,32 @@ def client_ne_kuch_bheja_kya(connected_client,nickname):
             if client_ka_bheja_hua_mssg == "exit!!":
                 print(f"{nickname} has closed the connection !!")
                 connected_client.close()
-                sys.exit(1)
-                s.close()
-                os._exit() 
+                # sys.exit(1)
+                # s.close()
+                # os._exit() 
                 break
-            print(f"\r{nickname}: {client_ka_bheja_hua_mssg}\nSERVER:",end=" ")
+            print(f"\r{nickname}: {client_ka_bheja_hua_mssg}\nSERVER:: ",end="")
         except:
             break
+
+def mssg_to_client(connected_client):
+    global SHUTDOWN
+    while True:
+        mssg_to_send = input("\rSERVER: ")
+        connected_client.send(mssg_to_send.encode())
+        try:
+            if mssg_to_send != "exit!!":
+                connected_client.send(mssg_to_client.encode())
+            else:
+                print(f"SHUTTING THE SERVER DOWN")
+                connected_client.close()
+                s.close()
+                SHUTDOWN = 1
+                break
+        except Exception as e:
+            print(f"Server closed because of client fault -> {e}")
+            break
+
 
 # # creating a object of socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,35 +53,36 @@ s.bind((server_host, server_port))
 
 s.listen()
 client_nickname = None
+
 print(f"SERVER is running at {server_host} on port {server_port}\n")
-conn, addr = s.accept()
-client_nickname = conn.recv(1024).decode()
-if client_nickname:
-    print(f"{client_nickname} has joined the server.")
-else:
-    client_nickname = "Someone"
-    print(f"{client_nickname} has joined the server.")
+
+def main():
+    conn, addr = s.accept()
+    if conn:
+        handle_client(conn)
+        
+def handle_client(conn):    
+    client_nickname = conn.recv(1024).decode()
+    if client_nickname:
+        print(f"{client_nickname} has joined the server.")
+    else:
+        client_nickname = "Someone"
+        print(f"{client_nickname} has joined the server.")
         
     
-    
-conn.send(f"Hello {client_nickname}, Welcome to the server\n".encode())
-conn.send("You can send your texts now...\n".encode())
-# Thread to handling receiving mssgs from client independently
-client_thread = threading.Thread(target=client_ne_kuch_bheja_kya, args=(conn,client_nickname))
-client_thread.start()
+    conn.send(f"Hello {client_nickname}, Welcome to the server\n".encode())
+    conn.send("You can send your texts now...\n".encode())
+    # Thread to handling receiving mssgs from client independently
+    client_thread_recv = threading.Thread(target=client_ne_kuch_bheja_kya, args=(conn,client_nickname))
+    client_thread_recv.start()
+    client_thread_send = threading.Thread(target=mssg_to_client, args=(conn,))
+    client_thread_send.start()
 
-while True:
-    if conn:
-        d = input("\rSERVER: ")
-        try:
-            if d != "exit!!" or not conn:
-                conn.send(d.encode())
-            else:
-                print("Closing the Server because of exit!! command")
-                conn.close()
-                s.close()
-                break
-        except:
-            print("Server closed because of no client")
-            break
-                
+    # client_thread_recv.join()
+    client_thread_send.join()
+
+if __name__ == "__main__":
+    while True:
+        main()
+        if SHUTDOWN:
+            os._exit()
