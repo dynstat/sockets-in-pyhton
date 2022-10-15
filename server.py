@@ -6,6 +6,7 @@ import threading
 
 # function to handle the received data from the client continuously
 def client_ne_kuch_bheja_kya(connected_client,nickname):
+    global s
     while True:
         try:
             client_ka_bheja_hua_mssg = connected_client.recv(1024).decode()
@@ -14,7 +15,8 @@ def client_ne_kuch_bheja_kya(connected_client,nickname):
             if client_ka_bheja_hua_mssg == "exit!!":
                 print(f"{nickname} has closed the connection !!")
                 connected_client.close()
-                # sys.exit(0)
+                sys.exit(1)
+                s.close()
                 os._exit() 
                 break
             print(f"\r{nickname}: {client_ka_bheja_hua_mssg}\nSERVER:",end=" ")
@@ -55,8 +57,9 @@ while True:
             if d != "exit!!" or not conn:
                 conn.send(d.encode())
             else:
-                print("Closing the Server because of no client")
+                print("Closing the Server because of exit!! command")
                 conn.close()
+                s.close()
                 break
         except:
             print("Server closed because of no client")
