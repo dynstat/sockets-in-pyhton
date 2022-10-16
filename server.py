@@ -1,3 +1,5 @@
+# THIS IS THE BASIC CODE BEFORE "FIX_DISCONNECTION" BRANCH WAS CREATED
+
 # import socket module
 import os
 import socket
