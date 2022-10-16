@@ -4,6 +4,7 @@ import os
 import socket
 import sys
 import threading
+from time import sleep
 
 # # creating a object of socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -39,7 +40,7 @@ def client_ne_kuch_bheja_kya(connected_client,nickname):
         except:
             break
 
-def mssg_to_client(connected_client):
+def mssg_to_client(connected_client, nickname):
     global SHUTDOWN
     while True:
         
@@ -49,13 +50,17 @@ def mssg_to_client(connected_client):
                 mssg_to_send = input("\rSERVER: ")
                 if mssg_to_send != "exit!!" and connected_client:
                     # print("in try")
-                    connected_client.send(mssg_to_send.encode())
+                    if connected_client:
+                        connected_client.send(mssg_to_send.encode())
                 else:
                     print(f"SHUTTING THE SERVER DOWN (from mss_to_client func)")
                     connected_client.close()
                     # s.close()
                     SHUTDOWN = 1
                     break
+            else:
+                print(f"{nickname} not found (deleting mssg_to_client for this client)")
+                break    
         except Exception as e:
             SHUTDOWN = 1
             print(f"Server closed because of client fault -> {e}")
@@ -66,9 +71,11 @@ def main():
     while True:
         conn, addr = s.accept()
         if conn:
-            handle_client(conn)
+            handle_client_thread = threading.Thread(target=handle_client, args=(conn,))
+            handle_client_thread.start()
         
 def handle_client(conn):    
+    THIS_CLIENT = 1
     client_nickname = conn.recv(1024).decode()
     if client_nickname:
         print(f"{client_nickname} has joined the server.")
@@ -82,7 +89,7 @@ def handle_client(conn):
     # Thread to handling receiving mssgs from client independently
     client_thread_recv = threading.Thread(target=client_ne_kuch_bheja_kya, args=(conn,client_nickname))
     client_thread_recv.start()
-    client_thread_send = threading.Thread(target=mssg_to_client, args=(conn,))
+    client_thread_send = threading.Thread(target=mssg_to_client, args=(conn,client_nickname))
     client_thread_send.start()
 
     # client_thread_recv.join()
@@ -96,6 +103,7 @@ if __name__ == "__main__":
     while True:
         print(f"main number {count}, shutdown value = {SHUTDOWN}")
         count +=1
+        sleep(1)
         # main()
         if SHUTDOWN:
             print("Shutting down (from main)")
