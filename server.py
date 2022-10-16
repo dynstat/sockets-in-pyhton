@@ -53,7 +53,7 @@ def mssg_to_client(connected_client, nickname):
                     if connected_client:
                         connected_client.send(mssg_to_send.encode())
                 else:
-                    print(f"SHUTTING THE SERVER DOWN (from mss_to_client func)")
+                    print(f"SHUTTING THE SERVER DOWN (from mssg_to_client func)")
                     connected_client.close()
                     # s.close()
                     SHUTDOWN = 1
@@ -93,7 +93,7 @@ def handle_client(conn):
     client_thread_send.start()
 
     # client_thread_recv.join()
-    client_thread_send.join()
+    # client_thread_send.join()
 
 if __name__ == "__main__":
     main_thread = threading.Thread(target=main)
