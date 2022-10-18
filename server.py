@@ -1,5 +1,4 @@
 # import socket module
-from ast import arg
 import os
 import socket
 import sys
@@ -12,7 +11,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_host = "127.0.0.1"
 server_port = 2005
 
-s.bind((server_host, server_port)) 
+s.bind((server_host, server_port))
 
 s.listen()
 client_nickname = None
