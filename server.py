@@ -68,7 +68,7 @@ def mssg_to_client(connected_client, nickname):
             break
 
 def main():
-    while True:
+    while True and not SHUTDOWN:
         conn, addr = s.accept()
         if conn:
             handle_client_thread = threading.Thread(target=handle_client, args=(conn,))
@@ -78,10 +78,12 @@ def handle_client(conn):
     THIS_CLIENT = 1
     client_nickname = conn.recv(1024).decode()
     if client_nickname:
-        print(f"{client_nickname} has joined the server.")
+        print("\33[2K",end="")
+        print(f"\r{client_nickname} has joined the server.")
     else:
         client_nickname = "Someone"
-        print(f"{client_nickname} has joined the server.")
+        print("\33[2K",end="")
+        print(f"\r{client_nickname} has joined the server.")
         
     
     conn.send(f"Hello {client_nickname}, Welcome to the server\n".encode())
@@ -96,16 +98,17 @@ def handle_client(conn):
     # client_thread_send.join()
 
 if __name__ == "__main__":
-    main_thread = threading.Thread(target=main)
+    main_thread = threading.Thread(target=main, daemon=True)
     main_thread.start()
     
     count = 1
     while True:
-        print(f"main number {count}, shutdown value = {SHUTDOWN}")
+        # print(f"\r    main number {count}, shutdown value = {SHUTDOWN}",end="")
         count +=1
         sleep(1)
         # main()
         if SHUTDOWN:
             print("Shutting down (from main)")
+            break
             sys.exit(1)
             
