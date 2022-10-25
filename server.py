@@ -9,7 +9,7 @@ from time import sleep
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 server_host = "127.0.0.1"
-server_port = 2005
+server_port = 8809
 
 s.bind((server_host, server_port))
 
