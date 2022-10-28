@@ -43,7 +43,7 @@ def mssg_to_client(connected_client, nickname):
     global SHUTDOWN
     while True:
         
-        # mssg_to_send = input("\rSERVER: ")
+
         try:
             if connected_client:
                 mssg_to_send = input("\rSERVER: ")
