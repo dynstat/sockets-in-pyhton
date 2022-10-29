@@ -5,7 +5,7 @@ import sys
 import threading
 
 # function to handle the received data from the client continuously
-def client_ne_kuch_bheja_kya(connected_client,nickname):
+def client_mssg_reception(connected_client,nickname):
     global s
     while True:
         try:
@@ -47,7 +47,7 @@ else:
 conn.send(f"Hello {client_nickname}, Welcome to the server\n".encode())
 conn.send("You can send your texts now...\n".encode())
 # Thread to handling receiving mssgs from client independently
-client_thread = threading.Thread(target=client_ne_kuch_bheja_kya, args=(conn,client_nickname))
+client_thread = threading.Thread(target=client_mssg_reception, args=(conn,client_nickname))
 client_thread.start()
 
 while True:
